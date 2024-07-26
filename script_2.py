@@ -10,7 +10,7 @@ def read_excel_to_dict(file_path):
         data[sheet_name] = excel_data.parse(sheet_name).to_dict(orient='records')
     return data
 
-# Função genérica para converter colunas específicas em uma lista de dicionários
+# Função para converter colunas em uma lista de dicionários
 def convert_columns_to_list(offer, prefixes):
     items = []
     columns = {prefix: [col for col in offer.keys() if col.startswith(prefix)] for prefix in prefixes}
@@ -20,7 +20,7 @@ def convert_columns_to_list(offer, prefixes):
             items.append(item)
     return items
 
-# Funções específicas usando a função genérica
+# Funções criar lista dinamica
 def convert_formas_pagamento(offer):
     return convert_columns_to_list(offer, ["formaPagamento", "descontoPagamento"])
 
@@ -37,20 +37,27 @@ def convert_pontos(offer):
 def generate_json_from_excel(excel_path, json_path):
     # Lendo os dados do Excel
     data = read_excel_to_dict(excel_path)
+
+    # Extraindo CNPJ
+    for offer in data['offers']:
+        # Construindo os dicionários
+        cnpj = {    
+        "cnpj": str(offer.get("cnpj", "")),
+        }
     
-    # Construção do JSON conforme o manual
+    # Construção do JSON
     json_data = {
         "dataUltimaAtualizacaoArquivo": datetime.now().strftime("%d/%m/%Y"),
-        "cnpj": "11111111111111",
+        "cnpj": cnpj,
         "ofertas": []
     }
 
     for offer in data['offers']:
         # Construindo os dicionários
         custo_inicial = {
-            "adesao": offer.get("adesao", ""),
-            "instalacao": offer.get("instalacao", ""),
-            "equipamento": offer.get("equipamento", "")
+            "adesao": str(offer.get("adesao", "")),
+            "instalacao": str(offer.get("instalacao", "")),
+            "equipamento": str(offer.get("equipamento", ""))
         }
         
         fidelizacao = {
@@ -58,7 +65,7 @@ def generate_json_from_excel(excel_path, json_path):
             "descontoFidelizacao": offer.get("descontoFidelizacao", ""),
             "tempoDesconto": offer.get("tempoDesconto", ""),
             "beneficioFidelizacao": offer.get("beneficioFidelizacao", ""),
-            "multaFidelizacao": offer.get("multaFidelizacao", "")
+            "multaFidelizacao": str(offer.get("multaFidelizacao", ""))
         }
         
         franquia_voz = {
@@ -119,16 +126,16 @@ def generate_json_from_excel(excel_path, json_path):
             listaAppIsentos = [puc.strip() for puc in listaAppIsentos.split(",")] if listaAppIsentos else []
 
         # Convertendo listaAppIsentos para lista de strings
-        listaSVA = offer.get("SMP_listaSVA", "")
-        if isinstance(listaSVA, str):
-            listaSVA = [puc.strip() for puc in listaSVA.split(",")] if listaSVA else []
+        SMP_listaSVA = offer.get("SMP_listaSVA", "")
+        if isinstance(SMP_listaSVA, str):
+            SMP_listaSVA = [puc.strip() for puc in SMP_listaSVA.split(",")] if SMP_listaSVA else []
 
         SMP = {
             "modalidadePagamento": offer.get("modalidadePagamento", ""),
             "validadePacote": offer.get("validadePacote", ""),
             "franquiaDados": franquia_dados,
             "listaAppIsentos": listaAppIsentos,
-            "listaSVA": listaSVA,
+            "listaSVA": SMP_listaSVA,
             "cobrancaTipo": cobranca_tipo,
             "franquiaVoz": franquia_voz,
             "franquiaSMS": franquia_SMS,
@@ -150,58 +157,62 @@ def generate_json_from_excel(excel_path, json_path):
         }
 
         # Convertendo listaTecnologia para lista de strings
-        listaTecnologia = offer.get("SCM_listaTecnologia", "")
-        if isinstance(listaTecnologia, str):
-            listaTecnologia = [puc.strip() for puc in listaTecnologia.split(",")] if listaTecnologia else []
+        SCM_listaTecnologia = offer.get("SCM_listaTecnologia", "")
+        if isinstance(SCM_listaTecnologia, str):
+            SCM_listaTecnologia = [puc.strip() for puc in SCM_listaTecnologia.split(",")] if SCM_listaTecnologia else []
 
         # Convertendo listaSVA para lista de strings
-        listaSVA = offer.get("SCM_listaSVA", "")
-        if isinstance(listaSVA, str):
-            listaSVA = [puc.strip() for puc in listaSVA.split(",")] if listaSVA else []        
+        SCM_listaSVA = offer.get("SCM_listaSVA", "")
+        if isinstance(SCM_listaSVA, str):
+            SCM_listaSVA = [puc.strip() for puc in SCM_listaSVA.split(",")] if SCM_listaSVA else []        
 
         SCM = {
             "wifiIncluso": offer.get("wifiIncluso", ""),
-            "listaTecnologia": listaTecnologia,
+            "listaTecnologia": SCM_listaTecnologia,
             "velocidade": velocidade,
-            "listaSVA": listaSVA
+            "listaSVA": SCM_listaSVA
         }
 
+        # Convertendo listaTecnologia para lista de strings
+        areasAbrangencia = offer.get("areasAbrangencia", "")
+        if isinstance(areasAbrangencia, str):
+            areasAbrangencia = [puc.strip() for puc in areasAbrangencia.split(",")] if areasAbrangencia else []
 
         # Convertendo listaTecnologia para lista de strings
-        listaTecnologia = offer.get("SEAC_listaTecnologia", "")
-        if isinstance(listaTecnologia, str):
-            listaTecnologia = [puc.strip() for puc in listaTecnologia.split(",")] if listaTecnologia else []
+        SEAC_listaTecnologia = offer.get("SEAC_listaTecnologia", "")
+        if isinstance(SEAC_listaTecnologia, str):
+            SEAC_listaTecnologia = [puc.strip() for puc in SEAC_listaTecnologia.split(",")] if SEAC_listaTecnologia else []
 
         # Convertendo listaTecnologia para lista de strings
-        listaCanais = offer.get("SEAC_listaCanais", "")
-        if isinstance(listaCanais, str):
-            listaCanais = [puc.strip() for puc in listaCanais.split(",")] if listaCanais else []
+        SEAC_listaCanais = offer.get("SEAC_listaCanais", "")
+        if isinstance(SEAC_listaCanais, str):
+            SEAC_listaCanais = [puc.strip() for puc in SEAC_listaCanais.split(",")] if SEAC_listaCanais else []
 
         # Convertendo listaTecnologia para lista de strings
-        listaCanaisAvulsos = offer.get("SEAC_listaCanaisAvulsos", "")
-        if isinstance(listaCanaisAvulsos, str):
-            listaCanaisAvulsos = [puc.strip() for puc in listaCanaisAvulsos.split(",")] if listaCanaisAvulsos else []      
+        SEAC_listaCanaisAvulsos = offer.get("SEAC_listaCanaisAvulsos", "")
+        if isinstance(SEAC_listaCanaisAvulsos, str):
+            SEAC_listaCanaisAvulsos = [puc.strip() for puc in SEAC_listaCanaisAvulsos.split(",")] if SEAC_listaCanaisAvulsos else []      
 
         # Convertendo listaTecnologia para lista de strings
-        listaSVA = offer.get("SEAC_listaSVA", "")
-        if isinstance(listaSVA, str):
-            listaSVA = [puc.strip() for puc in listaSVA.split(",")] if listaSVA else [] 
+        SEAC_listaSVA = offer.get("SEAC_listaSVA", "")
+        if isinstance(SEAC_listaSVA, str):
+            SEAC_listaSVA = [puc.strip() for puc in SEAC_listaSVA.split(",")] if SEAC_listaSVA else [] 
         
         SEAC = {
-            "listaTecnologia": listaTecnologia,
+            "listaTecnologia": SEAC_listaTecnologia,
             "multiPlataforma": offer.get("multiPlataforma", ""),
             "dvr": offer.get("dvr", ""),
             "pontos": convert_pontos(offer),
-            "listaCanais": listaCanais,
-            "listaCanaisAvulsos": listaCanaisAvulsos,
-            "listaSVA": listaSVA
+            "listaCanais": SEAC_listaCanais,
+            "listaCanaisAvulsos": SEAC_listaCanaisAvulsos,
+            "listaSVA": SEAC_listaSVA
         }
         
         offer_json = {
             "identificadorUnico": offer.get("identificadorUnico", ""),
             "tipoOferta": offer.get("tipoOferta", ""),
             "nomeOferta": offer.get("nomeOferta", ""),
-            "codigoOferta": offer.get("codigoOferta", ""),
+            "codigoOferta": str(offer.get("codigoOferta", "")),
             "custoInicial": custo_inicial,
             "etiquetaOferta": offer.get("etiquetaOferta", ""),
             "linkSite": offer.get("linkSite", ""),
@@ -209,12 +220,15 @@ def generate_json_from_excel(excel_path, json_path):
             "dataFimOferta": offer.get("dataFimOferta", ""),
             "fidelizacao": fidelizacao,
             "formasPagamento": convert_formas_pagamento(offer),
-            "areasAbrangencia": offer.get("areasAbrangencia", ""),
+            "destaqueOferta": offer.get("areasAbrangencia", ""),
+            "areasAbrangencia": areasAbrangencia,
+            "notasExtras": offer.get("notasExtras", ""),
             "focoVenda": offer.get("focoVenda", ""),
             "regOferta": offer.get("regOferta", ""),
             "modoEquipamento": offer.get("modoEquipamento", ""),
             "precoSemDescontos": offer.get("precoSemDescontos", ""),
             "listaPromocoes": convert_lista_de_promocoes(offer),
+            "beneficiosOfertaConjunta": offer.get("beneficiosOfertaConjunta", ""),
             "STFC": STFC,
             "SMP": SMP,
             "SCM": SCM,
@@ -227,7 +241,7 @@ def generate_json_from_excel(excel_path, json_path):
         json.dump(json_data, json_file, indent=4, ensure_ascii=False)
 
 # Caminhos dos arquivos (Excel de entrada e JSON de saída)
-excel_path = '/home/leonardojdss/Documentos/desafio_json/anatel_ofertas.xlsx'
+excel_path = 'anatel_ofertas.xlsx'
 json_path = 'output_file.json'
 
 # Chamando a função principal para gerar o JSON
