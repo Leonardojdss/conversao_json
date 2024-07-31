@@ -1,6 +1,14 @@
 import pandas as pd
 import json
 from datetime import datetime
+import streamlit as st
+
+# Front End Streamlit
+st.write("Conversor Excel regulatorio para Json")
+file_path = st.file_uploader("Faça upload de um documento XLSX", type=["xlsx"])
+
+# Donwload do arquivo json
+
 
 # Função para ler cada planilha e convertê-la num dictionary
 def read_excel_to_dict(file_path):
@@ -239,11 +247,14 @@ def generate_json_from_excel(excel_path, json_path):
     # Salvando o JSON em arquivo
     with open(json_path, 'w') as json_file:
         json.dump(json_data, json_file, indent=4, ensure_ascii=False)
+        #return json
 
 # Caminhos dos arquivos (Excel de entrada e JSON de saída)
-excel_path = 'anatel_ofertas.xlsx'
+excel_path = file_path
 json_path = 'output_file.json'
 
 # Chamando a função principal para gerar o JSON
 generate_json_from_excel(excel_path, json_path)
 print("JSON gerado com sucesso!")
+with open('output_file.json', 'r') as f:
+        st.download_button('Baixar JSON', f, file_name='Json_anatel.json')
